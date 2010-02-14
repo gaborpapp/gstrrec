@@ -37,21 +37,39 @@ GLEEINC = ['../libs/GLee']
 #RTAUDIOLIB = ['../libs/rtaudio-3.0.3/RtAudio.cpp']
 #RTAUDIOINC = ['../libs/rtaudio-3.0.3']
 
-'''
-XMLLIB = [ '../libs/tinyxml/tinyxml.cpp',
-	'../libs/tinyxml/tinystr.cpp',
-	'../libs/tinyxml/tinyxmlerror.cpp',
-	'../libs/tinyxml/tinyxmlparser.cpp']
-XMLINC = ['../libs/tinyxml']
+OFXMLSETTINGSLIB = ['../libs/ofxXmlSettings/libs/tinyxml.cpp',
+	'../libs/ofxXmlSettings/libs/tinyxmlerror.cpp',
+	'../libs/ofxXmlSettings/libs/tinyxmlparser.cpp',
+	'../libs/ofxXmlSettings/src/ofxXmlSettings.cpp']
 
-if platform == 'posix':
-    FMODINC = ['../libs/fmodapi41206linux/api/inc']
-else:
-    FMODINC = ['../libs/fmodapi41206mac/api/inc']
-'''
+OFXMLSETTINGSINC = ['../libs/ofxXmlSettings/src',
+	'../libs/ofxXmlSettings/libs']
 
-SOURCES = OFLIB + GLEELIB + APP_SOURCES
-INCLUDES = OFINC + GLEEINC
+OFXMSAIOLIB = ['../libs/ofxMSAInteractiveObject/src/ofxMSAInteractiveObject.cpp']
+OFXMSAIOINC = ['../libs/ofxMSAInteractiveObject/src']
+
+OFXSIMPLEGUILIB = ['../libs/ofxSimpleGuiToo/src/ofxSimpleGuiConfig.cpp',
+	'../libs/ofxSimpleGuiToo/src/ofxSimpleGuiControl.cpp',
+	'../libs/ofxSimpleGuiToo/src/ofxSimpleGuiPage.cpp',
+	'../libs/ofxSimpleGuiToo/src/ofxSimpleGuiToo.cpp',
+	'../libs/ofxSimpleGuiToo/src/Controls/ofxSimpleGuiButton.cpp',
+	'../libs/ofxSimpleGuiToo/src/Controls/ofxSimpleGuiColorPicker.cpp',
+	'../libs/ofxSimpleGuiToo/src/Controls/ofxSimpleGuiContent.cpp',
+	'../libs/ofxSimpleGuiToo/src/Controls/ofxSimpleGuiFPSCounter.cpp',
+	'../libs/ofxSimpleGuiToo/src/Controls/ofxSimpleGuiMovieSlider.cpp',
+	'../libs/ofxSimpleGuiToo/src/Controls/ofxSimpleGuiOption.cpp',
+	'../libs/ofxSimpleGuiToo/src/Controls/ofxSimpleGuiOptionGroup.cpp',
+	'../libs/ofxSimpleGuiToo/src/Controls/ofxSimpleGuiQuadWarp.cpp',
+	'../libs/ofxSimpleGuiToo/src/Controls/ofxSimpleGuiSlider2d.cpp',
+	'../libs/ofxSimpleGuiToo/src/Controls/ofxSimpleGuiTitle.cpp',
+	'../libs/ofxSimpleGuiToo/src/Controls/ofxSimpleGuiToggle.cpp']
+OFXSIMPLEGUIINC = ['../libs/ofxSimpleGuiToo/src/',
+	'../libs/ofxSimpleGuiToo/src/Controls/']
+
+SOURCES = OFLIB + GLEELIB + OFXMLSETTINGSLIB + \
+	OFXMSAIOLIB + OFXSIMPLEGUILIB + APP_SOURCES
+INCLUDES = OFINC + GLEEINC + OFXMLSETTINGSINC + \
+	OFXMSAIOINC + OFXSIMPLEGUIINC
 
 # add fobs on linux and quicktime otherwise
 if platform == 'posix':

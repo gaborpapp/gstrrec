@@ -1,4 +1,5 @@
 #include "testApp.h"
+#include "ofxVectorMath.h"
 #include "ofxSimpleGuiToo.h"
 
 
