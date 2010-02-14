@@ -1,0 +1,11 @@
+Installation
+------------
+
+* OSX
+
+Install MacPorts (http://www.macports.org/) and the required development tools
+and libraries: scons, pkgconfig, freeimage, freetype, poco.
+
+* Linux
+
+
