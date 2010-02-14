@@ -1,0 +1,156 @@
+################################################################################
+# gstrrec scons script
+
+TARGET = 'gstrrec'
+
+Import(['env', 'platform', 'DEBUG', 'PROFILE', 'STATIC'])
+
+APP_SOURCES  = ['main.cpp', 'testApp.cpp',]
+
+if platform == 'posix':
+	PKG_CONFIG = ARGUMENTS.get('PKGConfig', 'pkg-config')
+elif platform  == 'darwin':
+	PKG_CONFIG = ARGUMENTS.get('PKGConfig', '/opt/local/bin/pkg-config')
+
+OFLIB = ['../libs/openFrameworks/utils/ofMath.cpp',
+	'../libs/openFrameworks/utils/ofUtils.cpp',
+	'../libs/openFrameworks/graphics/ofBitmapFont.cpp',
+	'../libs/openFrameworks/graphics/ofGraphics.cpp',
+	'../libs/openFrameworks/graphics/ofImage.cpp',
+	'../libs/openFrameworks/graphics/ofTexture.cpp',
+	'../libs/openFrameworks/graphics/ofTrueTypeFont.cpp',
+	'../libs/openFrameworks/app/ofAppGlutWindow.cpp',
+	'../libs/openFrameworks/app/ofAppRunner.cpp',
+	'../libs/openFrameworks/video/ofVideoPlayer.cpp',
+	'../libs/openFrameworks/video/ofVideoGrabber.cpp'
+]
+#'../libs/openFrameworks/sound/ofSoundPlayer.cpp',
+#'../libs/openFrameworks/sound/ofSoundStream.cpp'
+# '../libs/openFrameworks/video/ofUCUtils.cpp',
+# '../libs/openFrameworks/communication/ofSerial.cpp'
+
+OFINC = ['../libs/openFrameworks']
+
+GLEELIB = ['../libs/GLee/GLee.c']
+GLEEINC = ['../libs/GLee']
+
+#RTAUDIOLIB = ['../libs/rtaudio-3.0.3/RtAudio.cpp']
+#RTAUDIOINC = ['../libs/rtaudio-3.0.3']
+
+'''
+XMLLIB = [ '../libs/tinyxml/tinyxml.cpp',
+	'../libs/tinyxml/tinystr.cpp',
+	'../libs/tinyxml/tinyxmlerror.cpp',
+	'../libs/tinyxml/tinyxmlparser.cpp']
+XMLINC = ['../libs/tinyxml']
+
+if platform == 'posix':
+    FMODINC = ['../libs/fmodapi41206linux/api/inc']
+else:
+    FMODINC = ['../libs/fmodapi41206mac/api/inc']
+'''
+
+SOURCES = OFLIB + GLEELIB + APP_SOURCES
+INCLUDES = OFINC + GLEEINC
+
+# add fobs on linux and quicktime otherwise
+if platform == 'posix':
+	FOBSLIB = ['../libs/fobs/Decoder.cpp',
+		'../libs/fobs/Encoder.cpp',
+		'../libs/fobs/Error.cpp',
+		'../libs/fobs/PacketBuffer.cpp',
+		'../libs/fobs/Transcoder.cpp'
+	]
+	FOBSINC = ['../libs/fobs']
+	SOURCES += FOBSLIB
+	INCLUDES += FOBSINC 
+else:
+	SOURCES += ['../libs/openFrameworks/video/ofQtUtils.cpp']
+
+# change the environment for building
+
+CCFLAGS = '-Wall -Wno-unknown-pragmas -Wno-long-long '
+#'-pedantic '
+
+
+LINKFLAGS = ''
+
+if platform != 'cygwin':
+	CCFLAGS += '-Wno-variadic-macros '
+
+if PROFILE:
+	DEBUG = 1
+	CCFLAGS += '-pg '
+	LINKFLAGS += '-pg '
+
+if DEBUG:
+	CCFLAGS += '-ggdb2 -O0 -DDEBUG=1 '
+else:
+	CCFLAGS += '-g0 -O3 '
+
+CPPPATH = ['/usr/include', 
+	'../libs/openFrameworks/app',
+	'../libs/openFrameworks/communication',
+	'../libs/openFrameworks/events',
+	'../libs/openFrameworks/graphics',
+	'../libs/openFrameworks/utils',
+	'../libs/openFrameworks/video'
+]
+
+CPPPATH += INCLUDES
+
+LIBPATH = []
+LIBS = []
+
+if platform == 'darwin':
+    LIBPATH += ['/opt/local/lib']
+
+env.Append(CPPPATH = CPPPATH)
+env.Append(CCFLAGS = CCFLAGS)
+env.Append(LINKFLAGS = LINKFLAGS)
+env.Append(LIBPATH = LIBPATH)
+env.Append(LIBS = LIBS)
+
+env.MergeFlags(['!%s --cflags --libs freetype2' % PKG_CONFIG])
+
+if platform == 'darwin':
+    env.Append(FRAMEWORKS = ['GLUT', 'OpenGL', 'QuickTime', 'CoreServices',
+	    'ApplicationServices', 'Carbon'])
+
+# platform specific fixes
+
+if platform == 'posix':
+	# ffmpeg does not compile with -pedantic
+	CCFLAGS_FFMPEG = CCFLAGS.replace('-pedantic ', '')
+	for i in range(len(SOURCES)):
+		if SOURCES[i] in FOBSLIB:
+			SOURCES[i] = env.Object(SOURCES[i], CCFLAGS = CCFLAGS_FFMPEG)
+
+# configure
+
+LIBS = [['m', 'math.h'],
+	['pthread', 'pthread.h'],
+	['freeimage', 'FreeImage.h'],
+	['freetype', 'ft2build.h'],
+	['PocoFoundation', 'Poco/Poco.h']]
+
+if platform == 'posix':
+	LIBS += [['X11', 'X11/Xlib.h'],
+		 ['GL', 'GL/gl.h'],
+		 ['GLU', 'GL/glu.h'],
+		 ['glut', 'GL/glut.h'],
+		 ['avformat', 'ffmpeg/avformat.h'],
+		 ['avcodec', 'ffmpeg/avcodec.h']]
+
+if not GetOption('clean'):
+	conf = Configure(env)
+	for (lib, headers) in LIBS:
+		if not conf.CheckLibWithHeader(lib, headers, 'c++'):
+			print "error: '%s' must be installed!" % lib
+			Exit(1)
+	env = conf.Finish()
+
+# build the application
+
+env.Program(source = SOURCES, target = TARGET)
+
