@@ -88,7 +88,7 @@ else:
 # change the environment for building
 
 CCFLAGS = '-Wall -Wno-unknown-pragmas -Wno-long-long '
-#'-pedantic '
+#'-pedantic ' # because of the ofPoint anonymous struct
 
 
 LINKFLAGS = ''
@@ -137,12 +137,14 @@ if platform == 'darwin':
 
 # platform specific fixes
 
+'''
 if platform == 'posix':
 	# ffmpeg does not compile with -pedantic
 	CCFLAGS_FFMPEG = CCFLAGS.replace('-pedantic ', '')
 	for i in range(len(SOURCES)):
 		if SOURCES[i] in FOBSLIB:
 			SOURCES[i] = env.Object(SOURCES[i], CCFLAGS = CCFLAGS_FFMPEG)
+'''
 
 # configure
 
@@ -171,4 +173,14 @@ if not GetOption('clean'):
 # build the application
 
 env.Program(source = SOURCES, target = TARGET)
+
+# run
+
+import os
+if platform == 'posix':
+    env['ENV']['DISPLAY'] = os.environ['DISPLAY']
+    if 'LIBGL_DRIVERS_PATH' in os.environ:
+        env['ENV']['LIBGL_DRIVERS_PATH'] = os.environ['LIBGL_DRIVERS_PATH']
+
+env.AlwaysBuild(env.Alias('run', [TARGET], '%s' % env.File(TARGET).abspath))
 

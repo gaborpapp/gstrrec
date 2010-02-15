@@ -40,31 +40,30 @@ ofxSimpleGuiConfig defaultSimpleGuiConfig;
 
 
 ofxSimpleGuiConfig::ofxSimpleGuiConfig() {
-	
+
 	sliderHeight		= 10;
-	sliderTextHeight	= 35;
+	sliderTextHeight	= 20;
 	titleHeight			= sliderHeight + sliderTextHeight;
-	toggleHeight		= titleHeight;
-	buttonHeight		= titleHeight;
-	slider2DTextHeight	= titleHeight * 1.5;
-	
-	
+	toggleHeight		= sliderTextHeight; //titleHeight;
+	buttonHeight		= sliderTextHeight; //titleHeight;
+	slider2DTextHeight	= titleHeight * 1.2;
+
 	padding.set			(titleHeight/2, 10);
 	offset.set			(titleHeight/2, titleHeight/2);
 	slider2DSize.set	(titleHeight * 4, titleHeight * 4);
-	
+
 	gridSize.x			= 256 + padding.x;
 	gridSize.y			= toggleHeight + padding.y;
-	
+
 	textColor			= 0x888888;
 	textOverColor		= 0xFFFFFF;
 	textBGColor			= 0x000000;
 	textBGOverColor		= 0x222222;
-	
+
 	fullColor			= 0xaaaaaa;
 	fullOverColor		= 0xffffff;
 	fullActiveColor		= 0x881818;
 	emptyColor			= 0x333333;
-	
+
 	borderColor			= 0x333333;
 }

@@ -1,83 +1,57 @@
 #include "testApp.h"
 #include "ofxSimpleGuiToo.h"
 
+testApp::testApp() :
+	source_video(true),
+	source_video_last(false)
+{
+}
 
+testApp::~testApp()
+{
+	video_player.close();
+}
 
-bool	myBool1;
-bool	myBool2;
-bool	myBool3;
-bool	myBool4;
-bool	myBool5;
-bool	myBool6;
-bool	myBool7;
-bool	myBool8;
-bool	myBool9;
+void testApp::setup()
+{
+	ofBackground(100, 100, 100);
 
-int		myInt1;
-int		myInt2;
-int		myInt3;
-int		myInt4;
-int		myInt5;
-int		myInt6;
-int		myInt7;
-int		myInt8;
-int		myInt9;
+	ofSetDataPathRoot("data/");
+	video_player.loadMovie("test-01.mov");
 
-float	myFloat1;
-float	myFloat2;
-float	myFloat3;
-float	myFloat4;
-float	myFloat5;
-float	myFloat6;
-float	myFloat7;
-float	myFloat8;
-float	myFloat9;
+	video_grabber.initGrabber(640, 480);
 
+	video_width = max(video_player.getWidth(), video_grabber.getWidth());
+	video_height = max(video_player.getHeight(), video_grabber.getHeight());
 
-// for demonstrating adding any drawable object (that extends ofBaseDraw);
-ofVideoGrabber		vidGrabber;
-unsigned char * 	videoInverted;
-ofTexture			videoTexture;
+	video_texture.allocate(video_width, video_height, GL_RGB);
+	//videoInverted = new unsigned char[int(vidGrabber.getWidth() * vidGrabber.getHeight() * 3)];
+	//videoTexture.allocate(vidGrabber.getWidth(), vidGrabber.getHeight(), GL_RGB);
 
-bool	randomizeButton = true;
+	gui.addContent("Camera/Video feed", video_texture, 320);
+	gui.addToggle("Use video", source_video).setSize(128, 20);
+	gui.addButton("Next camera", camera_next).setSize(128, 20);
+	gui.addButton("Prev camera", camera_prev).setSize(128, 20);
+	gui.page(1).setName("Hand Gesture Classifier");
+	//gui.addContent("Inverted", videoTexture, 160);
 
-ofPoint *points;
-ofPoint	v[300];
-
-//--------------------------------------------------------------
-void testApp::setup(){	 
-	ofBackground(0, 0, 0);
-	
-	// for demonstrating adding any drawable object (that extends ofBaseDraw);
-	vidGrabber.initGrabber(320, 240);	
-	videoInverted 	= new unsigned char[int(vidGrabber.getWidth() * vidGrabber.getHeight() * 3)];
-	videoTexture.allocate(vidGrabber.getWidth(), vidGrabber.getHeight(), GL_RGB);
-	
-	
-	// 'gui' is a global variable declared in ofxSimpleGuiToo.h
-	gui.addTitle("A group");
-	gui.addSlider("myFloat1", myFloat1, 0.0, 1); 
-	gui.addSlider("myInt1", myInt1, 5, 10); 
-	gui.addToggle("myBool1", myBool1);
-	gui.addButton("Randomize Background", randomizeButton);
-	
-	
+/*
 	// start a new group
 	gui.addTitle("Another group");
 	gui.addSlider("myFloat2", myFloat2, 0.0, 1);
 	gui.addSlider("myInt2", myInt2, 3, 8);
-	gui.addToggle("myBool2", myBool2);	
+	gui.addToggle("myBool2", myBool2);
 
 	// new group, this time separate into it's own column
 	gui.addTitle("Yes one more group").setNewColumn(true);
-	gui.addToggle("myBool4", myBool4);	
-	gui.addToggle("myBool3", myBool3);	
+	gui.addToggle("myBool4", myBool4);
+	gui.addToggle("myBool3", myBool3);
 	gui.addSlider("myFloat3", myFloat3, 0.0, 1);
 	gui.addSlider("myFloat4", myFloat4, 0.0, 20);
 	gui.addSlider("myInt6", myInt6, 0, 10);
 	gui.addSlider("myInt4", myInt4, 10, 20);
-	gui.addContent("Camera feed", vidGrabber);
-	gui.addContent("Inverted", videoTexture);
+	gui.addContent("Camera feed", vidGrabber, 160);
+	gui.addContent("Inverted", videoTexture, 160);
 	
 	
 	gui.addPage("A new page");		// use '[' ']' to cycle through pages, or keys 1-9
@@ -105,43 +79,61 @@ void testApp::setup(){
 	gui.addSlider("myFloat6", myFloat6, 0.0, 1);
 	gui.addSlider("myFloat9", myFloat9, 0.0, 0.01 ); 
 	gui.addToggle("myBool9", myBool9);	
-	
-	
+
+	*/
+
 	gui.loadFromXML();
-	
+
 	gui.show();
 }
 
 //--------------------------------------------------------------
-void testApp::update(){
-	if(randomizeButton) {
-		randomizeButton = false;
-		ofBackground(ofRandom(0, 255), ofRandom(0, 255), ofRandom(0, 255));
+void testApp::update()
+{
+	if (source_video != source_video_last)
+	{
+		if (source_video)
+		{
+			video_player.play();
+		}
+		else
+		{
+			video_player.stop();
+		}
 	}
-	
-	
-	// from ofVideoGrabber example (
-	vidGrabber.update();
-	if(vidGrabber.isFrameNew()){
-		int totalPixels = vidGrabber.getWidth() * vidGrabber.getHeight() * 3;
-		unsigned char * pixels = vidGrabber.getPixels();
-		for(int i = 0; i < totalPixels; i++) videoInverted[i] = 255 - pixels[i];
-		videoTexture.loadData(videoInverted, vidGrabber.getWidth(), vidGrabber.getHeight(), GL_RGB);
+
+	if (source_video)
+	{
+		video_player.update();
+		video_texture.loadData(video_player.getPixels(),
+				video_player.getWidth(), video_player.getHeight(), GL_RGB);
 	}
+	else
+	{
+		video_grabber.update();
+		video_texture.loadData(video_grabber.getPixels(),
+				video_grabber.getWidth(), video_grabber.getHeight(), GL_RGB);
+	}
+
+	source_video_last = source_video;
 }
 
-//--------------------------------------------------------------
-void testApp::draw(){
+void testApp::draw()
+{
 	gui.draw();
 }
 
-//--------------------------------------------------------------
-void testApp::keyPressed (int key){ 
-	if(key>='0' && key<='9') {
+void testApp::keyPressed (int key)
+{
+	if (key>='0' && key<='9')
+	{
 		gui.setPage(key - '0');
 		gui.show();
-	} else {
-		switch(key) {
+	}
+	else
+	{
+		switch(key)
+		{
 			case ' ': gui.toggleDraw(); break;
 			case '[': gui.prevPage(); break;
 			case ']': gui.nextPage(); break;
@@ -150,24 +142,23 @@ void testApp::keyPressed (int key){
 	}
 }
 
-//--------------------------------------------------------------
-void testApp::keyReleased  (int key){ 
-	
+void testApp::keyReleased(int key)
+{
 }
 
-//--------------------------------------------------------------
-void testApp::mouseMoved(int x, int y ){
+void testApp::mouseMoved(int x, int y )
+{
 }
 
-//--------------------------------------------------------------
-void testApp::mouseDragged(int x, int y, int button){
+void testApp::mouseDragged(int x, int y, int button)
+{
 }
 
-//--------------------------------------------------------------
-void testApp::mousePressed(int x, int y, int button){
+void testApp::mousePressed(int x, int y, int button)
+{
 }
 
-//--------------------------------------------------------------
-void testApp::mouseReleased(){
-
+void testApp::mouseReleased()
+{
 }
+
