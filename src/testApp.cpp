@@ -1,15 +1,19 @@
 #include "testApp.h"
-#include "ofxSimpleGuiToo.h"
 
 testApp::testApp() :
 	source_video(true),
-	source_video_last(false)
+	source_video_last(false),
+	camera_prev(false),
+	camera_next(false),
+	camera_id(0)
 {
 }
 
 testApp::~testApp()
 {
 	video_player.close();
+	video_grabber.close();
+	video_texture.clear();
 }
 
 void testApp::setup()
@@ -19,21 +23,22 @@ void testApp::setup()
 	ofSetDataPathRoot("data/");
 	video_player.loadMovie("test-01.mov");
 
-	video_grabber.initGrabber(640, 480);
+	video_grabber.setVerbose(false);
+	video_grabber.listDevices();
+	video_grabber.setDeviceID(camera_id);
+	video_grabber.initGrabber(CAMERA_WIDTH, CAMERA_HEIGHT);
 
 	video_width = max(video_player.getWidth(), video_grabber.getWidth());
 	video_height = max(video_player.getHeight(), video_grabber.getHeight());
 
 	video_texture.allocate(video_width, video_height, GL_RGB);
-	//videoInverted = new unsigned char[int(vidGrabber.getWidth() * vidGrabber.getHeight() * 3)];
-	//videoTexture.allocate(vidGrabber.getWidth(), vidGrabber.getHeight(), GL_RGB);
 
-	gui.addContent("Camera/Video feed", video_texture, 320);
+	gui_video = &gui.addContent("Camera feed", video_texture, 320);
+
 	gui.addToggle("Use video", source_video).setSize(128, 20);
 	gui.addButton("Next camera", camera_next).setSize(128, 20);
 	gui.addButton("Prev camera", camera_prev).setSize(128, 20);
 	gui.page(1).setName("Hand Gesture Classifier");
-	//gui.addContent("Inverted", videoTexture, 160);
 
 /*
 	// start a new group
@@ -52,34 +57,18 @@ void testApp::setup()
 	gui.addSlider("myInt4", myInt4, 10, 20);
 	gui.addContent("Camera feed", vidGrabber, 160);
 	gui.addContent("Inverted", videoTexture, 160);
-	
-	
+
+
 	gui.addPage("A new page");		// use '[' ']' to cycle through pages, or keys 1-9
 	gui.addSlider("myInt5", myInt5, 2, 5);
 	gui.addSlider("myInt7", myInt7, 0, 100);
 	gui.addSlider("myInt8", myInt8, 10, 50);
 	gui.addSlider("myInt3", myInt3, 0, 100);
-	gui.addSlider("myFloat7", myFloat7, 0.0, 1);
-	gui.addSlider("myFloat8", myFloat8, 0.0, 0.1);
-	gui.addSlider("myInt9", myInt9, 0, 10); 
 
-	gui.addTitle("Final group?");
-	gui.addToggle("myBool5", myBool5);	
-	gui.addToggle("myBool6", myBool6);	
-	gui.addToggle("myBool7", myBool7);	
-	gui.addToggle("myBool8", myBool8);	
-	
-	
 	// by default each page is saved in an xml with the same name as display name
 	// you can override this with ofxSimpleGuiPage::setXMLName(string s);
 	// ofxSimpleGuiToo::addPage() returns reference to the page, so you can do it directly on one line
 	// of save it in a variable for use later
-	gui.addPage("My 3rd page").setXMLName("foo.xml");	
-	gui.addSlider("myFloat5", myFloat5, 0.0, 5);
-	gui.addSlider("myFloat6", myFloat6, 0.0, 1);
-	gui.addSlider("myFloat9", myFloat9, 0.0, 0.01 ); 
-	gui.addToggle("myBool9", myBool9);	
-
 	*/
 
 	gui.loadFromXML();
@@ -87,18 +76,39 @@ void testApp::setup()
 	gui.show();
 }
 
-//--------------------------------------------------------------
 void testApp::update()
 {
+	if (camera_next || camera_prev)
+	{
+		if (camera_next)
+		{
+			camera_id++;
+		}
+		else if (camera_prev)
+		{
+			camera_id--;
+			if (camera_id < 0)
+				camera_id = 0;
+		}
+
+		video_grabber.close();
+		video_grabber.setDeviceID(camera_id);
+		video_grabber.initGrabber(CAMERA_WIDTH, CAMERA_HEIGHT);
+
+		camera_next = camera_prev = false;
+	}
+
 	if (source_video != source_video_last)
 	{
 		if (source_video)
 		{
 			video_player.play();
+			gui_video->setName("Video Feed");
 		}
 		else
 		{
 			video_player.stop();
+			gui_video->setName("Camera Feed");
 		}
 	}
 
@@ -125,21 +135,6 @@ void testApp::draw()
 
 void testApp::keyPressed (int key)
 {
-	if (key>='0' && key<='9')
-	{
-		gui.setPage(key - '0');
-		gui.show();
-	}
-	else
-	{
-		switch(key)
-		{
-			case ' ': gui.toggleDraw(); break;
-			case '[': gui.prevPage(); break;
-			case ']': gui.nextPage(); break;
-			case 'p': gui.nextPageWithBlank(); break;
-		}
-	}
 }
 
 void testApp::keyReleased(int key)
