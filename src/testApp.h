@@ -3,6 +3,7 @@
 
 #include "ofMain.h"
 #include "ofxSimpleGuiToo.h"
+#include "ofxOpenCv.h"
 
 #define CAMERA_WIDTH 640
 #define CAMERA_HEIGHT 480
@@ -25,15 +26,11 @@ class testApp : public ofSimpleApp
 		void mouseReleased();
 
 	private:
-		int video_width;
-		int video_height;
+		void update_source();
+		void find_contours();
 
+		// gui
 		ofxSimpleGuiContent *gui_video;
-
-		ofVideoGrabber video_grabber;
-		ofVideoPlayer video_player;
-
-		ofTexture video_texture;
 
 		bool source_video;
 		bool source_video_last;
@@ -41,7 +38,25 @@ class testApp : public ofSimpleApp
 		bool camera_prev;
 		bool camera_next;
 
+		// video source
+		int video_width;
+		int video_height;
+
+
+		ofVideoGrabber video_grabber;
+		ofVideoPlayer video_player;
+
+		ofTexture video_texture;
+
 		int camera_id;
+
+		bool new_frame_available;
+
+		// ofxOpenCV
+		ofxCvColorImage img_color;
+		ofxCvGrayscaleImage img_gray;
+
+		ofxCvContourFinder contour_finder;
 };
 
 #endif

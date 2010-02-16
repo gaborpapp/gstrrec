@@ -7,6 +7,9 @@ testApp::testApp() :
 	camera_next(false),
 	camera_id(0)
 {
+	img_color.allocate(CAMERA_WIDTH, CAMERA_HEIGHT);
+	img_gray.allocate(CAMERA_WIDTH, CAMERA_HEIGHT);
+
 }
 
 testApp::~testApp()
@@ -14,6 +17,9 @@ testApp::~testApp()
 	video_player.close();
 	video_grabber.close();
 	video_texture.clear();
+
+	img_color.clear();
+	img_gray.clear();
 }
 
 void testApp::setup()
@@ -32,12 +38,17 @@ void testApp::setup()
 
 	video_texture.allocate(video_width, video_height, GL_RGB);
 
+
 	gui_video = &gui.addContent("Camera feed", video_texture, 320);
 
 	gui.addToggle("Use video", source_video).setSize(128, 20);
 	gui.addButton("Next camera", camera_next).setSize(128, 20);
 	gui.addButton("Prev camera", camera_prev).setSize(128, 20);
+
+	gui.addContent("Tracker", img_gray, 320).setNewColumn(true);
+
 	gui.page(1).setName("Hand Gesture Classifier");
+
 
 /*
 	// start a new group
@@ -75,8 +86,35 @@ void testApp::setup()
 	gui.show();
 }
 
+void testApp::find_contours()
+{
+	if (source_video)
+	{
+		img_color.setFromPixels(video_player.getPixels(),
+				video_player.getWidth(), video_player.getHeight());
+	}
+	else
+	{
+		img_color.setFromPixels(video_grabber.getPixels(),
+				video_grabber.getWidth(), video_grabber.getHeight());
+	}
+
+	// convert to grayscale with operator overloading
+	img_gray = img_color;
+
+	contour_finder.findContours(img_gray, 20, (340*240), 10, true);
+}
+
 void testApp::update()
 {
+	update_source();
+
+	find_contours();
+}
+
+void testApp::update_source()
+{
+	// init previous/next camera
 	if (camera_next || camera_prev)
 	{
 		if (camera_next)
@@ -100,6 +138,7 @@ void testApp::update()
 		camera_next = camera_prev = false;
 	}
 
+	// check source change
 	if (source_video != source_video_last)
 	{
 		if (source_video)
@@ -116,17 +155,27 @@ void testApp::update()
 		}
 	}
 
+	// update video source
+	new_frame_available = false;
 	if (source_video)
 	{
 		video_player.update();
-		video_texture.loadData(video_player.getPixels(),
-				video_player.getWidth(), video_player.getHeight(), GL_RGB);
+		new_frame_available = video_player.isFrameNew();
+		if (new_frame_available)
+		{
+			video_texture.loadData(video_player.getPixels(),
+					video_player.getWidth(), video_player.getHeight(), GL_RGB);
+		}
 	}
 	else
 	{
 		video_grabber.update();
-		video_texture.loadData(video_grabber.getPixels(),
-				video_grabber.getWidth(), video_grabber.getHeight(), GL_RGB);
+		new_frame_available = video_player.isFrameNew();
+		if (new_frame_available)
+		{
+			video_texture.loadData(video_grabber.getPixels(),
+					video_grabber.getWidth(), video_grabber.getHeight(), GL_RGB);
+		}
 	}
 
 	source_video_last = source_video;
@@ -135,6 +184,8 @@ void testApp::update()
 void testApp::draw()
 {
 	gui.draw();
+
+	contour_finder.draw(351, 56, 320, 240);
 }
 
 void testApp::keyPressed (int key)

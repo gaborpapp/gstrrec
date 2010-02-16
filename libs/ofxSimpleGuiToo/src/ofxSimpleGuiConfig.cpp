@@ -52,7 +52,7 @@ ofxSimpleGuiConfig::ofxSimpleGuiConfig() {
 	offset.set			(titleHeight/2, titleHeight/2);
 	slider2DSize.set	(titleHeight * 4, titleHeight * 4);
 
-	gridSize.x			= 256 + padding.x;
+	gridSize.x			= 320 + padding.x;
 	gridSize.y			= toggleHeight + padding.y;
 
 	textColor			= 0x888888;

@@ -38,7 +38,6 @@ OFXMLSETTINGSLIB = ['../libs/ofxXmlSettings/libs/tinyxml.cpp',
 	'../libs/ofxXmlSettings/libs/tinyxmlerror.cpp',
 	'../libs/ofxXmlSettings/libs/tinyxmlparser.cpp',
 	'../libs/ofxXmlSettings/src/ofxXmlSettings.cpp']
-
 OFXMLSETTINGSINC = ['../libs/ofxXmlSettings/src',
 	'../libs/ofxXmlSettings/libs']
 
