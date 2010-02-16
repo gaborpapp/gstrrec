@@ -34,9 +34,6 @@ OFINC = ['../libs/openFrameworks']
 GLEELIB = ['../libs/GLee/GLee.c']
 GLEEINC = ['../libs/GLee']
 
-#RTAUDIOLIB = ['../libs/rtaudio-3.0.3/RtAudio.cpp']
-#RTAUDIOINC = ['../libs/rtaudio-3.0.3']
-
 OFXMLSETTINGSLIB = ['../libs/ofxXmlSettings/libs/tinyxml.cpp',
 	'../libs/ofxXmlSettings/libs/tinyxmlerror.cpp',
 	'../libs/ofxXmlSettings/libs/tinyxmlparser.cpp',
@@ -66,10 +63,18 @@ OFXSIMPLEGUILIB = ['../libs/ofxSimpleGuiToo/src/ofxSimpleGuiConfig.cpp',
 OFXSIMPLEGUIINC = ['../libs/ofxSimpleGuiToo/src/',
 	'../libs/ofxSimpleGuiToo/src/Controls/']
 
+OFXOPENCVLIB = ['../libs/ofxOpenCv/src/ofxCvColorImage.cpp',
+	'../libs/ofxOpenCv/src/ofxCvContourFinder.cpp',
+	'../libs/ofxOpenCv/src/ofxCvFloatImage.cpp',
+	'../libs/ofxOpenCv/src/ofxCvGrayscaleImage.cpp',
+	'../libs/ofxOpenCv/src/ofxCvImage.cpp',
+	'../libs/ofxOpenCv/src/ofxCvShortImage.cpp']
+OFXOPENCVINC = ['../libs/ofxOpenCv/src']
+
 SOURCES = OFLIB + GLEELIB + OFXMLSETTINGSLIB + \
-	OFXMSAIOLIB + OFXSIMPLEGUILIB + APP_SOURCES
+	OFXMSAIOLIB + OFXSIMPLEGUILIB + OFXOPENCVLIB + APP_SOURCES
 INCLUDES = OFINC + GLEEINC + OFXMLSETTINGSINC + \
-	OFXMSAIOINC + OFXSIMPLEGUIINC
+	OFXMSAIOINC + OFXSIMPLEGUIINC + OFXOPENCVINC
 
 # add fobs on linux and quicktime otherwise
 if platform == 'posix':
@@ -129,7 +134,8 @@ env.Append(LINKFLAGS = LINKFLAGS)
 env.Append(LIBPATH = LIBPATH)
 env.Append(LIBS = LIBS)
 
-env.MergeFlags(['!%s --cflags --libs freetype2' % PKG_CONFIG])
+for lib in ['freetype2', 'opencv']:
+	env.MergeFlags(['!%s --cflags --libs %s' % (PKG_CONFIG, lib)])
 
 if platform == 'darwin':
     env.Append(FRAMEWORKS = ['GLUT', 'OpenGL', 'QuickTime', 'CoreServices',
@@ -151,8 +157,9 @@ if platform == 'posix':
 LIBS = [['m', 'math.h'],
 	['pthread', 'pthread.h'],
 	['freeimage', 'FreeImage.h'],
-	['freetype', 'ft2build.h'],
-	['PocoFoundation', 'Poco/Poco.h']]
+	['freetype', 'ft2build.h', False],
+	['PocoFoundation', 'Poco/Poco.h'],
+	[['cv', 'cxcore'], 'cv.h', False]]
 
 if platform == 'posix':
 	LIBS += [['X11', 'X11/Xlib.h'],
@@ -164,8 +171,14 @@ if platform == 'posix':
 
 if not GetOption('clean'):
 	conf = Configure(env)
-	for (lib, headers) in LIBS:
-		if not conf.CheckLibWithHeader(lib, headers, 'c++'):
+	for l in LIBS:
+		if len(l) == 2:
+			(lib, headers) = l
+			autoadd = 1
+		else:
+			(lib, headers, autoadd) = l
+
+		if not conf.CheckLibWithHeader(lib, headers, 'c++', autoadd = autoadd):
 			print "error: '%s' must be installed!" % lib
 			Exit(1)
 	env = conf.Finish()

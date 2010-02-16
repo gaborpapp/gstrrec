@@ -26,7 +26,6 @@ void testApp::setup()
 	video_grabber.setVerbose(false);
 	video_grabber.listDevices();
 	video_grabber.setDeviceID(camera_id);
-	video_grabber.initGrabber(CAMERA_WIDTH, CAMERA_HEIGHT);
 
 	video_width = max(video_player.getWidth(), video_grabber.getWidth());
 	video_height = max(video_player.getHeight(), video_grabber.getHeight());
@@ -91,9 +90,12 @@ void testApp::update()
 				camera_id = 0;
 		}
 
-		video_grabber.close();
-		video_grabber.setDeviceID(camera_id);
-		video_grabber.initGrabber(CAMERA_WIDTH, CAMERA_HEIGHT);
+		if (!source_video)
+		{
+			video_grabber.close();
+			video_grabber.setDeviceID(camera_id);
+			video_grabber.initGrabber(CAMERA_WIDTH, CAMERA_HEIGHT);
+		}
 
 		camera_next = camera_prev = false;
 	}
@@ -104,11 +106,13 @@ void testApp::update()
 		{
 			video_player.play();
 			gui_video->setName("Video Feed");
+			video_grabber.close();
 		}
 		else
 		{
 			video_player.stop();
 			gui_video->setName("Camera Feed");
+			video_grabber.initGrabber(CAMERA_WIDTH, CAMERA_HEIGHT);
 		}
 	}
 
