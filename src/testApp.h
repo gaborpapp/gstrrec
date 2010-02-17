@@ -5,8 +5,6 @@
 #include "ofxSimpleGuiToo.h"
 #include "ofxOpenCv.h"
 
-#include "CPUImageFilter.h"
-
 #define CAMERA_WIDTH 640
 #define CAMERA_HEIGHT 480
 

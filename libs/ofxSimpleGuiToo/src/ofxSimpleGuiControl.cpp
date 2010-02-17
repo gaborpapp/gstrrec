@@ -47,9 +47,11 @@ ofxSimpleGuiControl::ofxSimpleGuiControl(string name) {
 	focused	  = false;
 	newColumn = false;
 	setKeyboardShortcut(0);
+	dx = 0;
+	dy = 0;
 
 	setup();
-	
+
 	disableAllEvents();		// just for safety to make sure nothing is registered twice
 //	enableAppEvents();
 //	enableMouseEvents();
@@ -59,10 +61,13 @@ ofxSimpleGuiControl::ofxSimpleGuiControl(string name) {
 ofxSimpleGuiControl &ofxSimpleGuiControl::setConfig(ofxSimpleGuiConfig *config) {
 	this->config = config;
 	setup();
+
+	return *this;
 }
 
 ofxSimpleGuiControl &ofxSimpleGuiControl::setNewColumn(bool b) {
 	newColumn = b;
+	return *this;
 }
 
 
@@ -71,10 +76,17 @@ ofxSimpleGuiControl &ofxSimpleGuiControl::setName(string newName) {
 	name = newName;
 	origName = name;
 	if(key.compare("") == 0) setKey("");	// if key has not been set yet, set name as key too
-	
+
 	hasTitle = (name.compare("") != 0);
+	return *this;
 }
 
+
+ofxSimpleGuiControl& ofxSimpleGuiControl::setDeltaPos(int dx, int dy) {
+	this->dx = dx;
+	this->dy = dy;
+	return *this;
+}
 
 ofxSimpleGuiControl &ofxSimpleGuiControl::setKey(string newKey) {
 	if(newKey.compare("") == 0) key = name;
@@ -82,29 +94,34 @@ ofxSimpleGuiControl &ofxSimpleGuiControl::setKey(string newKey) {
 	for(int i=0; i<key.size(); i++) {
 		if(key[i] == ' ') key[i] = '_';
 	}
+	return *this;
 }
 
 ofxSimpleGuiControl &ofxSimpleGuiControl::setTextColor(bool clickable) {
 	if(isMouseOver() && clickable) ofSetColor(config->textOverColor);
 	else ofSetColor(config->textColor);
+	return *this;
 }
 
 ofxSimpleGuiControl &ofxSimpleGuiControl::setTextBGColor(bool clickable) {
 	if(isMouseOver() && clickable) ofSetColor(config->textBGOverColor);
 	else ofSetColor(config->textBGColor);
+	return *this;
 }
 
 ofxSimpleGuiControl &ofxSimpleGuiControl::setFullColor(bool forceActive) {
 	if(isMouseDown() || forceActive) ofSetColor(config->fullActiveColor);
 	else if(isMouseOver()) ofSetColor(config->fullOverColor);
 	else ofSetColor(config->fullColor);
+	return *this;
 }
 
 ofxSimpleGuiControl &ofxSimpleGuiControl::setEmptyColor() {
 	ofSetColor(config->emptyColor);
 	//		if(isMouseOver()) ofSetColor(config->overColor.r, config->overColor.g, config->overColor.b);
 	//		if(focused && !isMouseOver()) ofSetColor(config->focusColor.r, config->focusColor.g, config->focusColor.b);
-	
+
+	return *this;
 }
 
 ofxSimpleGuiControl &ofxSimpleGuiControl::setKeyboardShortcut(char c) {
@@ -115,5 +132,7 @@ ofxSimpleGuiControl &ofxSimpleGuiControl::setKeyboardShortcut(char c) {
 	} else {
 		name = origName;
 	}
+
+	return *this;
 }
 

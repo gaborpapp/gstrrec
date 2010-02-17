@@ -51,6 +51,8 @@ public:
 	bool		newColumn;
 	bool		hasTitle;
 	char		keyboardShortcut;
+	int			dx;
+	int			dy;
 
 	ofxSimpleGuiControl(string name);
 	ofxSimpleGuiControl& setName(string newName);
@@ -63,7 +65,9 @@ public:
 	ofxSimpleGuiControl& setFullColor(bool forceActive = false);
 	ofxSimpleGuiControl& setEmptyColor();
 	ofxSimpleGuiControl& setKeyboardShortcut(char c);
-	
+
+	ofxSimpleGuiControl& setDeltaPos(int dx, int dy);
+
 	virtual void loadFromXML(ofxXmlSettings &XML) {}
 	virtual void saveToXML(ofxXmlSettings &XML) {}
 

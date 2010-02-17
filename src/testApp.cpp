@@ -49,26 +49,27 @@ void testApp::setup()
 	gui_video = &gui.addContent("Camera feed", video_texture, 320);
 	gui.page(1).setName("Hand Gesture Classifier");
 
+	ofxSimpleGuiConfig *c = gui.config;
 	gui.addToggle("Use video", source_video).setSize(128, 20);
 	gui.addButton("Prev camera", camera_prev).setSize(128, 20);
-	gui.addButton("Next camera", camera_next).setSize(128, 20);
+	gui.addButton("Next camera", camera_next).setDeltaPos(128 + c->padding.x,-(c->buttonHeight + c->padding.y)).setSize(128, 20);
 
 	gui.addContent("Tracker", img_gray, 320).setNewColumn(true);
 	gui.addSlider("Min area", contour_min_area, 0, 1);
 	gui.addSlider("Max area", contour_max_area, 0, 1);
 
 	gui.addContent("", img_blur, 160).setNewColumn(true);
-	gui.addToggle("Blur", filter_blur).setSize(128, 20);
-	gui.addSlider("Value", filter_blur_amount, 0, 15).setSize(160, 30);
+	gui.addToggle("Blur", filter_blur).setDeltaPos(170, -(140 + c->padding.y)).setSize(150, 20);
+	gui.addSlider("Value", filter_blur_amount, 0, 15).setDeltaPos(170, -120).setSize(150, 30);
 
 	gui.addContent("", img_highpass, 160);
-	gui.addToggle("Highpass", filter_highpass).setSize(128, 20);
-	gui.addSlider("Blur", filter_highpass_blur_amount, 0, 200).setSize(160, 30);
-	gui.addSlider("Noise", filter_highpass_noise_amount, 0, 30).setSize(160, 30);
+	gui.addToggle("Highpass", filter_highpass).setDeltaPos(170, -(140 + c->padding.y)).setSize(150, 20);
+	gui.addSlider("Blur", filter_highpass_blur_amount, 0, 200).setDeltaPos(170, -120).setSize(150, 30);
+	gui.addSlider("Noise", filter_highpass_noise_amount, 0, 30).setDeltaPos(170, -80).setSize(150, 30);
 
 	gui.addContent("", img_amplify, 160);
-	gui.addToggle("Amplify", filter_amplify).setSize(128, 20);
-	gui.addSlider("Value", filter_amplify_amount, 0, 3.).setSize(160, 30);
+	gui.addToggle("Amplify", filter_amplify).setDeltaPos(170, -(140 + c->padding.y)).setSize(150, 20);
+	gui.addSlider("Value", filter_amplify_amount, 0, 3.).setDeltaPos(170, -120).setSize(150, 30);
 
 /*
 	// start a new group

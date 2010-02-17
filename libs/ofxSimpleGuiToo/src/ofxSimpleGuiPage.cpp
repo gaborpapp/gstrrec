@@ -111,7 +111,7 @@ float ofxSimpleGuiPage::getNextY(float y) {
 void ofxSimpleGuiPage::draw(float x, float y, bool alignRight) {
 	setPos(x += config->offset.x, y += config->offset.y);
 	if(alignRight) x = ofGetWidth() - x -  config->gridSize.x;
-		
+
 	float posX		= 0;
 	float posY		= 0;
 
@@ -125,25 +125,28 @@ void ofxSimpleGuiPage::draw(float x, float y, bool alignRight) {
 			else posX += config->gridSize.x;
 			posY = 0;
 		}
-		
+
 		float controlX = posX + x;
 		float controlY = posY + y;
-		
-		control.draw(controlX, controlY);
+
+		control.draw(controlX + control.dx, controlY + control.dy);
 		if(control.hasTitle) {
 			ofNoFill();
 			ofSetColor(config->borderColor);
 			glLineWidth(0.5f);
-			ofRect(controlX, controlY, control.width, control.height);
+			ofRect(controlX + control.dx, controlY + control.dy, control.width, control.height);
 		}
-		posY = getNextY(posY + control.height + config->padding.y);
+		if ((control.dx == 0) && (control.dy == 0))
+		{
+			posY = getNextY(posY + control.height + config->padding.y);
+		}
 
 		if(posY + y >= height - control.height - config->padding.y) {
 			if(alignRight) posX -= config->gridSize.x;
 			else posX += config->gridSize.x;
 			posY = 0;
 		}
-		
+
 		//		if(guiFocus == controls[i]->guiID) controls[i]->focused = true;		// MEMO
 		//		else							   controls[i]->focused = false;
 	}
