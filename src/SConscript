@@ -5,7 +5,7 @@ TARGET = 'gstrrec'
 
 Import(['env', 'platform', 'DEBUG', 'PROFILE', 'STATIC'])
 
-APP_SOURCES  = ['main.cpp', 'testApp.cpp',]
+APP_SOURCES  = ['main.cpp', 'testApp.cpp']
 
 if platform == 'posix':
 	PKG_CONFIG = ARGUMENTS.get('PKGConfig', 'pkg-config')

@@ -25,7 +25,7 @@ class ofxCvBlob;
 
 
 class ofxCvImage : public ofBaseImage {
-    
+
   public:
 
     int width;
@@ -91,14 +91,16 @@ class ofxCvImage : public ofBaseImage {
     virtual void setAnchorPercent( float xPct, float yPct );
     virtual void setAnchorPoint( float x, float y );
     virtual void resetAnchor();
-    
-    
+
+
     // Image Filter Operations
     //
     virtual void  erode( );                     // based on 3x3 shape
     virtual void  dilate( );                    // based on 3x3 shape
     virtual void  blur( int value=3 );          // value = x*2+1, where x is an integer
     virtual void  blurGaussian( int value=3 );  // value = x*2+1, where x is an integer
+	virtual void  highpass ( int blur1, int blur2 ); // value = x*2+1, where x is an integer
+	virtual void  amplify( float level );
     virtual void  invert();
     virtual void  contrastStretch() = 0;
     virtual void  convertToRange(float min, float max) = 0;

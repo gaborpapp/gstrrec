@@ -467,6 +467,34 @@ void ofxCvImage::blurGaussian( int value ) {
 }
 
 //--------------------------------------------------------------------------------
+void ofxCvImage::highpass( int blur, int noise ) {
+	// Blur Original Image
+	if(blur > 0)
+	{
+		cvSmooth( cvImage, cvImageTemp, CV_BLUR , (blur * 2) + 1);
+	}
+
+	// Original Image - Blur Image = Highpass Image
+	cvSub( cvImage, cvImageTemp, cvImageTemp );
+
+	// Blur Highpass to remove noise
+	if(noise > 0)
+	{
+		cvSmooth( cvImageTemp, cvImageTemp, CV_BLUR , (noise * 2) + 1);
+	}
+
+	swapTemp();
+	flagImageChanged();
+}
+
+//--------------------------------------------------------------------------------
+void ofxCvImage::amplify( float level ) {
+    cvMul( cvImage, cvImage, cvImageTemp, level );
+    swapTemp();
+    flagImageChanged();
+}
+
+//--------------------------------------------------------------------------------
 void ofxCvImage::invert(){
     cvNot(cvImage, cvImage);
     flagImageChanged();

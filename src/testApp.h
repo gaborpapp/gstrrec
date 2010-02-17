@@ -5,6 +5,8 @@
 #include "ofxSimpleGuiToo.h"
 #include "ofxOpenCv.h"
 
+#include "CPUImageFilter.h"
+
 #define CAMERA_WIDTH 640
 #define CAMERA_HEIGHT 480
 
@@ -28,6 +30,7 @@ class testApp : public ofSimpleApp
 	private:
 		void update_source();
 		void find_contours();
+		void apply_filters();
 
 		// gui
 		ofxSimpleGuiContent *gui_video;
@@ -42,7 +45,6 @@ class testApp : public ofSimpleApp
 		int video_width;
 		int video_height;
 
-
 		ofVideoGrabber video_grabber;
 		ofVideoPlayer video_player;
 
@@ -55,8 +57,25 @@ class testApp : public ofSimpleApp
 		// ofxOpenCV
 		ofxCvColorImage img_color;
 		ofxCvGrayscaleImage img_gray;
+		ofxCvGrayscaleImage img_blur;
+		ofxCvGrayscaleImage img_highpass;
+		ofxCvGrayscaleImage img_amplify;
 
 		ofxCvContourFinder contour_finder;
+
+		float contour_min_area;
+		float contour_max_area;
+
+		// filter
+		bool filter_blur;
+		int filter_blur_amount;
+
+		bool filter_highpass;
+		int filter_highpass_blur_amount;
+		int filter_highpass_noise_amount;
+
+		bool filter_amplify;
+		float filter_amplify_amount;
 };
 
 #endif

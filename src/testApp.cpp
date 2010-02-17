@@ -7,9 +7,6 @@ testApp::testApp() :
 	camera_next(false),
 	camera_id(0)
 {
-	img_color.allocate(CAMERA_WIDTH, CAMERA_HEIGHT);
-	img_gray.allocate(CAMERA_WIDTH, CAMERA_HEIGHT);
-
 }
 
 testApp::~testApp()
@@ -20,6 +17,9 @@ testApp::~testApp()
 
 	img_color.clear();
 	img_gray.clear();
+	img_blur.clear();
+	img_highpass.clear();
+	img_amplify.clear();
 }
 
 void testApp::setup()
@@ -27,7 +27,10 @@ void testApp::setup()
 	ofBackground(100, 100, 100);
 
 	ofSetDataPathRoot("data/");
-	video_player.loadMovie("test-01.mov");
+	if (!video_player.loadMovie("test-01.mov"))
+	{
+		::exit(1);
+	}
 
 	video_grabber.setVerbose(false);
 	video_grabber.listDevices();
@@ -37,18 +40,35 @@ void testApp::setup()
 	video_height = max(video_player.getHeight(), video_grabber.getHeight());
 
 	video_texture.allocate(video_width, video_height, GL_RGB);
-
+	img_color.allocate(video_width, video_height);
+	img_gray.allocate(video_width, video_height);
+	img_blur.allocate(video_width, video_height);
+	img_highpass.allocate(video_width, video_height);
+	img_amplify.allocate(video_width, video_height);
 
 	gui_video = &gui.addContent("Camera feed", video_texture, 320);
-
-	gui.addToggle("Use video", source_video).setSize(128, 20);
-	gui.addButton("Next camera", camera_next).setSize(128, 20);
-	gui.addButton("Prev camera", camera_prev).setSize(128, 20);
-
-	gui.addContent("Tracker", img_gray, 320).setNewColumn(true);
-
 	gui.page(1).setName("Hand Gesture Classifier");
 
+	gui.addToggle("Use video", source_video).setSize(128, 20);
+	gui.addButton("Prev camera", camera_prev).setSize(128, 20);
+	gui.addButton("Next camera", camera_next).setSize(128, 20);
+
+	gui.addContent("Tracker", img_gray, 320).setNewColumn(true);
+	gui.addSlider("Min area", contour_min_area, 0, 1);
+	gui.addSlider("Max area", contour_max_area, 0, 1);
+
+	gui.addContent("", img_blur, 160).setNewColumn(true);
+	gui.addToggle("Blur", filter_blur).setSize(128, 20);
+	gui.addSlider("Value", filter_blur_amount, 0, 15).setSize(160, 30);
+
+	gui.addContent("", img_highpass, 160);
+	gui.addToggle("Highpass", filter_highpass).setSize(128, 20);
+	gui.addSlider("Blur", filter_highpass_blur_amount, 0, 200).setSize(160, 30);
+	gui.addSlider("Noise", filter_highpass_noise_amount, 0, 30).setSize(160, 30);
+
+	gui.addContent("", img_amplify, 160);
+	gui.addToggle("Amplify", filter_amplify).setSize(128, 20);
+	gui.addSlider("Value", filter_amplify_amount, 0, 3.).setSize(160, 30);
 
 /*
 	// start a new group
@@ -88,26 +108,70 @@ void testApp::setup()
 
 void testApp::find_contours()
 {
-	if (source_video)
+	int img_area = video_width * video_height;
+	contour_finder.findContours(img_gray,
+								img_area * contour_min_area,
+								img_area * contour_max_area, 10, true);
+}
+
+void testApp::apply_filters()
+{
+	if (filter_blur)
 	{
-		img_color.setFromPixels(video_player.getPixels(),
-				video_player.getWidth(), video_player.getHeight());
+		if (filter_blur_amount > 0)
+		{
+			img_gray.blur((filter_blur_amount * 2) + 1);
+		}
+		img_blur = img_gray;
 	}
 	else
 	{
-		img_color.setFromPixels(video_grabber.getPixels(),
-				video_grabber.getWidth(), video_grabber.getHeight());
+		img_blur.set(0);
 	}
 
-	// convert to grayscale with operator overloading
-	img_gray = img_color;
+	if (filter_highpass)
+	{
+		img_gray.highpass(filter_highpass_blur_amount, filter_highpass_noise_amount);
+		img_highpass = img_gray;
+	}
+	else
+	{
+		img_highpass.set(0);
+	}
 
-	contour_finder.findContours(img_gray, 20, (340*240), 10, true);
+	if (filter_amplify)
+	{
+		img_gray.amplify(filter_amplify_amount);
+		img_amplify = img_gray;
+	}
+	else
+	{
+		img_amplify.set(0);
+	}
 }
 
 void testApp::update()
 {
+	static int values_inited = 0; // if gui values are loaded
+
+	// before the first update the gui is updated
+	if (!values_inited)
+	{
+		source_video_last = !source_video;
+		values_inited = 1;
+	}
+
 	update_source();
+
+	img_color.setFromPixels(source_video ? video_player.getPixels() :
+										   video_grabber.getPixels(),
+							video_width, video_height);
+
+	// convert to grayscale with operator overloading
+	img_gray = img_color;
+
+	// enhance image quality
+	apply_filters();
 
 	find_contours();
 }
@@ -170,7 +234,7 @@ void testApp::update_source()
 	else
 	{
 		video_grabber.update();
-		new_frame_available = video_player.isFrameNew();
+		new_frame_available = video_grabber.isFrameNew();
 		if (new_frame_available)
 		{
 			video_texture.loadData(video_grabber.getPixels(),
