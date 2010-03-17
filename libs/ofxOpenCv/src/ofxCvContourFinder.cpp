@@ -141,7 +141,7 @@ int ofxCvContourFinder::findContours( ofxCvGrayscaleImage&  input,
 }
 
 //--------------------------------------------------------------------------------
-void ofxCvContourFinder::draw( float x, float y, float w, float h ) {
+void ofxCvContourFinder::draw( float x, float y, float w, float h, unsigned flags ) {
 
     float scalex = 0.0f;
     float scaley = 0.0f;
@@ -163,23 +163,24 @@ void ofxCvContourFinder::draw( float x, float y, float w, float h ) {
     glScalef( scalex, scaley, 0.0 );
 
 	ofNoFill();
-	for( int i=0; i<(int)blobs.size(); i++ ) {
-		ofRect( blobs[i].boundingRect.x, blobs[i].boundingRect.y,
-                blobs[i].boundingRect.width, blobs[i].boundingRect.height );
-	}
+	if (flags & DRAW_BBOX)
+		for( int i=0; i<(int)blobs.size(); i++ ) {
+			ofRect( blobs[i].boundingRect.x, blobs[i].boundingRect.y,
+					blobs[i].boundingRect.width, blobs[i].boundingRect.height );
+		}
 
 	// ---------------------------- draw the blobs
 	ofSetColor(0x00FFFF);
 
-	for( int i=0; i<(int)blobs.size(); i++ ) {
-		ofNoFill();
-		ofBeginShape();
-		for( int j=0; j<blobs[i].nPts; j++ ) {
-			ofVertex( blobs[i].pts[j].x, blobs[i].pts[j].y );
+	if (flags & DRAW_BLOB)
+		for( int i=0; i<(int)blobs.size(); i++ ) {
+			ofNoFill();
+			ofBeginShape();
+			for( int j=0; j<blobs[i].nPts; j++ ) {
+				ofVertex( blobs[i].pts[j].x, blobs[i].pts[j].y );
+			}
+			ofEndShape();
 		}
-		ofEndShape();
-
-	}
 	glPopMatrix();
 }
 

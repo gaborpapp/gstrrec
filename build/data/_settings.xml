@@ -19,6 +19,14 @@
         <name>Max area</name>
         <value>0.490625</value>
     </SliderFloat_Max_area>
+    <Toggle_Draw_bbox>
+        <name>Draw bbox</name>
+        <value>1</value>
+    </Toggle_Draw_bbox>
+    <Toggle_Draw_blob>
+        <name>Draw blob</name>
+        <value>1</value>
+    </Toggle_Draw_blob>
     <Toggle_Blur>
         <name>Blur</name>
         <value>1</value>
@@ -45,6 +53,6 @@
     </Toggle_Amplify>
     <SliderFloat_Value>
         <name>Value</name>
-        <value>0.450000</value>
+        <value>0.200000</value>
     </SliderFloat_Value>
 </controls>

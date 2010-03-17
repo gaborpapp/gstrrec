@@ -39,6 +39,9 @@ class testApp : public ofSimpleApp
 		bool camera_prev;
 		bool camera_next;
 
+		bool draw_bbox;
+		bool draw_blob;
+
 		// video source
 		int video_width;
 		int video_height;

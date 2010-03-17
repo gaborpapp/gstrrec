@@ -57,6 +57,8 @@ void testApp::setup()
 	gui.addContent("Tracker", img_gray, 320).setNewColumn(true);
 	gui.addSlider("Min area", contour_min_area, 0, 1);
 	gui.addSlider("Max area", contour_max_area, 0, 1);
+	gui.addToggle("Draw bbox", draw_bbox);
+	gui.addToggle("Draw blob", draw_blob);
 
 	gui.addContent("", img_blur, 160).setNewColumn(true);
 	gui.addToggle("Blur", filter_blur).setDeltaPos(170, -(140 + c->padding.y)).setSize(150, 20);
@@ -250,7 +252,10 @@ void testApp::draw()
 {
 	gui.draw();
 
-	contour_finder.draw(351, 56, 320, 240);
+	unsigned flags = (draw_bbox ? ofxCvContourFinder::DRAW_BBOX : 0) |
+					 (draw_blob ? ofxCvContourFinder::DRAW_BLOB : 0);
+
+	contour_finder.draw(351, 55, 320, 240, flags);
 }
 
 void testApp::keyPressed (int key)
