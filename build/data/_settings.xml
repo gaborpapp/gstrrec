@@ -21,12 +21,16 @@
     </SliderFloat_Max_area>
     <Toggle_Draw_bbox>
         <name>Draw bbox</name>
-        <value>1</value>
+        <value>0</value>
     </Toggle_Draw_bbox>
     <Toggle_Draw_blob>
         <name>Draw blob</name>
-        <value>1</value>
+        <value>0</value>
     </Toggle_Draw_blob>
+    <Toggle_Draw_hull>
+        <name>Draw hull</name>
+        <value>1</value>
+    </Toggle_Draw_hull>
     <Toggle_Blur>
         <name>Blur</name>
         <value>1</value>

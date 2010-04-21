@@ -59,6 +59,7 @@ void testApp::setup()
 	gui.addSlider("Max area", contour_max_area, 0, 1);
 	gui.addToggle("Draw bbox", draw_bbox);
 	gui.addToggle("Draw blob", draw_blob);
+	gui.addToggle("Draw hull", draw_hull);
 
 	gui.addContent("", img_blur, 160).setNewColumn(true);
 	gui.addToggle("Blur", filter_blur).setDeltaPos(170, -(140 + c->padding.y)).setSize(150, 20);
@@ -253,7 +254,8 @@ void testApp::draw()
 	gui.draw();
 
 	unsigned flags = (draw_bbox ? ofxCvContourFinder::DRAW_BBOX : 0) |
-					 (draw_blob ? ofxCvContourFinder::DRAW_BLOB : 0);
+					 (draw_blob ? ofxCvContourFinder::DRAW_BLOB : 0) |
+					 (draw_hull ? ofxCvContourFinder::DRAW_HULL : 0);
 
 	contour_finder.draw(351, 55, 320, 240, flags);
 }

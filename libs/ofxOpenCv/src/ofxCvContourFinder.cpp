@@ -91,12 +91,10 @@ int ofxCvContourFinder::findContours( ofxCvGrayscaleImage&  input,
 		contour_ptr = contour_ptr->h_next;
 	}
 
-
 	// sort the pointers based on size
 	if( cvSeqBlobs.size() > 1 ) {
         sort( cvSeqBlobs.begin(), cvSeqBlobs.end(), sort_carea_compare );
 	}
-
 
 	// now, we have cvSeqBlobs.size() contours, sorted by size in the array
     // cvSeqBlobs let's get the data out and into our structures that we like
@@ -108,25 +106,37 @@ int ofxCvContourFinder::findContours( ofxCvGrayscaleImage&  input,
 
 		blobs[i].area                     = fabs(area);
 		blobs[i].hole                     = area < 0 ? true : false;
-		blobs[i].length 			      = cvArcLength(cvSeqBlobs[i]);
+		blobs[i].length				      = cvArcLength(cvSeqBlobs[i]);
 		blobs[i].boundingRect.x           = rect.x;
 		blobs[i].boundingRect.y           = rect.y;
 		blobs[i].boundingRect.width       = rect.width;
 		blobs[i].boundingRect.height      = rect.height;
-		blobs[i].centroid.x 			  = (myMoments->m10 / myMoments->m00);
-		blobs[i].centroid.y 			  = (myMoments->m01 / myMoments->m00);
+		blobs[i].centroid.x				  = (myMoments->m10 / myMoments->m00);
+		blobs[i].centroid.y				  = (myMoments->m01 / myMoments->m00);
 
 		// get the points for the blob:
 		CvPoint           pt;
 		CvSeqReader       reader;
 		cvStartReadSeq( cvSeqBlobs[i], &reader, 0 );
 
-    	for( int j=0; j < cvSeqBlobs[i]->total; j++ ) {
+		for( int j=0; j < cvSeqBlobs[i]->total; j++ ) {
 			CV_READ_SEQ_ELEM( pt, reader );
             blobs[i].pts.push_back( ofPoint((float)pt.x, (float)pt.y) );
 		}
 		blobs[i].nPts = blobs[i].pts.size();
 
+		// convex hull
+		CvSeq* seq_hull = NULL;
+		seq_hull = cvConvexHull2(cvSeqBlobs[i], 0, CV_COUNTER_CLOCKWISE, 0);
+
+		for (int j = 0; j < seq_hull->total; j++)
+		{
+			CvPoint *pt = *CV_GET_SEQ_ELEM(CvPoint*, seq_hull, j);
+            blobs[i].hull.push_back(ofPoint((float)pt->x, (float)pt->y));
+		}
+
+		if (seq_hull != NULL)
+			cvClearSeq(seq_hull);
 	}
 
     nBlobs = blobs.size();
@@ -137,7 +147,6 @@ int ofxCvContourFinder::findContours( ofxCvGrayscaleImage&  input,
 	if( storage != NULL ) { cvReleaseMemStorage(&storage); }
 
 	return nBlobs;
-
 }
 
 //--------------------------------------------------------------------------------
@@ -178,6 +187,21 @@ void ofxCvContourFinder::draw( float x, float y, float w, float h, unsigned flag
 			ofBeginShape();
 			for( int j=0; j<blobs[i].nPts; j++ ) {
 				ofVertex( blobs[i].pts[j].x, blobs[i].pts[j].y );
+			}
+			ofEndShape();
+		}
+
+	// ---------------------------- draw the convex hull
+	ofSetColor(0x00FF00);
+
+	if (flags & DRAW_HULL)
+		for (unsigned i = 0; i < blobs.size(); i++)
+		{
+			ofNoFill();
+			ofBeginShape();
+			for (unsigned j = 0; j < blobs[i].hull.size(); j++)
+			{
+				ofVertex(blobs[i].hull[j].x, blobs[i].hull[j].y);
 			}
 			ofEndShape();
 		}

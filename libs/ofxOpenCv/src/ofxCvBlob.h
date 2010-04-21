@@ -20,6 +20,11 @@
 class ofxCvBlob {
 
     public:
+		~ofxCvBlob()
+		{
+			pts.clear();
+			hull.clear();
+		}
 
         float               area;
         float               length;
@@ -30,11 +35,13 @@ class ofxCvBlob {
         vector <ofPoint>    pts;    // the contour of the blob
         int                 nPts;   // number of pts;
 
+		vector <ofPoint>	hull;	// points of convex hull
+
         //----------------------------------------
         ofxCvBlob() {
-            area 		= 0.0f;
-            length 		= 0.0f;
-            hole 		= false;
+            area		= 0.0f;
+            length		= 0.0f;
+            hole		= false;
             nPts        = 0;
         }
 

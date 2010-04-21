@@ -23,18 +23,19 @@ class ofxCvContourFinder : public ofBaseDraws {
 
 	enum {
 		DRAW_BBOX = 1,
-		DRAW_BLOB = (1 << 1)
+		DRAW_BLOB = 2,
+		DRAW_HULL = 4
 	};
     vector<ofxCvBlob>  blobs;
     int                nBlobs;    // DEPRECATED: use blobs.size() instead
-      
+
 
     ofxCvContourFinder();
     virtual  ~ofxCvContourFinder();
-    
+
 	virtual float getWidth() { return _width; };    //set after first findContours call
 	virtual float getHeight() { return _height; };  //set after first findContours call
-    
+
     virtual int  findContours( ofxCvGrayscaleImage& input,
                                int minArea, int maxArea,
                                int nConsidered, bool bFindHoles,
@@ -66,9 +67,9 @@ class ofxCvContourFinder : public ofBaseDraws {
     CvMemStorage*           storage;
     CvMoments*              myMoments;
     vector<CvSeq*>          cvSeqBlobs;  //these will become blobs
-    
+
     ofPoint  anchor;
-    bool  bAnchorIsPct;      
+    bool  bAnchorIsPct;
 
     virtual void reset();
 

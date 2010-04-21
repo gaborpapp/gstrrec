@@ -41,6 +41,7 @@ class testApp : public ofSimpleApp
 
 		bool draw_bbox;
 		bool draw_blob;
+		bool draw_hull;
 
 		// video source
 		int video_width;
