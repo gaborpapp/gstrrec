@@ -24,8 +24,10 @@ class ofxCvContourFinder : public ofBaseDraws {
 	enum {
 		DRAW_BBOX = 1,
 		DRAW_BLOB = 2,
-		DRAW_HULL = 4
+		DRAW_HULL = 4,
+		DRAW_CONVDEFECT = 8
 	};
+
     vector<ofxCvBlob>  blobs;
     int                nBlobs;    // DEPRECATED: use blobs.size() instead
 

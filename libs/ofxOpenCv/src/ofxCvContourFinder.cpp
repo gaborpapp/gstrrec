@@ -75,6 +75,7 @@ int ofxCvContourFinder::findContours( ofxCvGrayscaleImage&  input,
 	CvSeq* contour_list = NULL;
 	contour_storage = cvCreateMemStorage( 1000 );
 	storage	= cvCreateMemStorage( 1000 );
+	CvMemStorage *defects_storage = cvCreateMemStorage(64);
 
 	CvContourRetrievalMode  retrieve_mode
         = (bFindHoles) ? CV_RETR_LIST : CV_RETR_EXTERNAL;
@@ -126,7 +127,7 @@ int ofxCvContourFinder::findContours( ofxCvGrayscaleImage&  input,
 		blobs[i].nPts = blobs[i].pts.size();
 
 		// convex hull
-		CvSeq* seq_hull = NULL;
+		CvSeq *seq_hull = NULL;
 		seq_hull = cvConvexHull2(cvSeqBlobs[i], 0, CV_COUNTER_CLOCKWISE, 0);
 
 		for (int j = 0; j < seq_hull->total; j++)
@@ -135,8 +136,20 @@ int ofxCvContourFinder::findContours( ofxCvGrayscaleImage&  input,
             blobs[i].hull.push_back(ofPoint((float)pt->x, (float)pt->y));
 		}
 
-		if (seq_hull != NULL)
-			cvClearSeq(seq_hull);
+		// find defects of contour
+		CvSeq *defects = cvConvexityDefects(cvSeqBlobs[i], seq_hull, defects_storage);
+		float depth_thr = rect.height * .1;
+		for (int j = 0; j < defects->total; j++)
+		{
+			CvConvexityDefect *def = CV_GET_SEQ_ELEM(CvConvexityDefect, defects, j);
+			if (def->depth > depth_thr)
+				blobs[i].defects.push_back(ofConvDefect(def));
+		}
+
+		cvClearSeq(defects);
+		cvClearMemStorage(defects_storage);
+
+		cvClearSeq(seq_hull);
 	}
 
     nBlobs = blobs.size();
@@ -145,6 +158,7 @@ int ofxCvContourFinder::findContours( ofxCvGrayscaleImage&  input,
 	// Warning: do this inside this function otherwise a strange memory leak
 	if( contour_storage != NULL ) { cvReleaseMemStorage(&contour_storage); }
 	if( storage != NULL ) { cvReleaseMemStorage(&storage); }
+	if( defects_storage != NULL ) { cvReleaseMemStorage(&defects_storage); }
 
 	return nBlobs;
 }
@@ -205,6 +219,20 @@ void ofxCvContourFinder::draw( float x, float y, float w, float h, unsigned flag
 			}
 			ofEndShape();
 		}
+
+	// ---------------------------- draw convexity defects
+	ofSetColor(0xFF7711);
+
+	if (flags & DRAW_CONVDEFECT)
+		for (unsigned i = 0; i < blobs.size(); i++)
+		{
+			ofNoFill();
+			for (unsigned j = 0; j < blobs[i].defects.size(); j++)
+			{
+				ofCircle(blobs[i].defects[j].depth_point.x, blobs[i].defects[j].depth_point.y, 6);
+			}
+		}
+
 	glPopMatrix();
 }
 

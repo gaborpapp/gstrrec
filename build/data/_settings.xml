@@ -25,12 +25,16 @@
     </Toggle_Draw_bbox>
     <Toggle_Draw_blob>
         <name>Draw blob</name>
-        <value>0</value>
+        <value>1</value>
     </Toggle_Draw_blob>
     <Toggle_Draw_hull>
         <name>Draw hull</name>
         <value>1</value>
     </Toggle_Draw_hull>
+    <Toggle_Draw_defects>
+        <name>Draw defects</name>
+        <value>1</value>
+    </Toggle_Draw_defects>
     <Toggle_Blur>
         <name>Blur</name>
         <value>1</value>

@@ -60,6 +60,7 @@ void testApp::setup()
 	gui.addToggle("Draw bbox", draw_bbox);
 	gui.addToggle("Draw blob", draw_blob);
 	gui.addToggle("Draw hull", draw_hull);
+	gui.addToggle("Draw defects", draw_defects);
 
 	gui.addContent("", img_blur, 160).setNewColumn(true);
 	gui.addToggle("Blur", filter_blur).setDeltaPos(170, -(140 + c->padding.y)).setSize(150, 20);
@@ -255,7 +256,8 @@ void testApp::draw()
 
 	unsigned flags = (draw_bbox ? ofxCvContourFinder::DRAW_BBOX : 0) |
 					 (draw_blob ? ofxCvContourFinder::DRAW_BLOB : 0) |
-					 (draw_hull ? ofxCvContourFinder::DRAW_HULL : 0);
+					 (draw_hull ? ofxCvContourFinder::DRAW_HULL : 0) |
+					 (draw_defects ? ofxCvContourFinder::DRAW_CONVDEFECT : 0);
 
 	contour_finder.draw(351, 55, 320, 240, flags);
 }

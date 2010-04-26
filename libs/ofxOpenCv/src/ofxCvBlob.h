@@ -16,6 +16,17 @@
 
 #include "ofxCvConstants.h"
 
+class ofConvDefect {
+	public:
+		ofConvDefect(CvConvexityDefect *def)
+		{
+			depth_point = ofPoint(def->depth_point->x, def->depth_point->y);
+			depth = def->depth;
+		}
+
+		ofPoint depth_point;
+		float depth;
+};
 
 class ofxCvBlob {
 
@@ -24,6 +35,7 @@ class ofxCvBlob {
 		{
 			pts.clear();
 			hull.clear();
+			defects.clear();
 		}
 
         float               area;
@@ -36,6 +48,8 @@ class ofxCvBlob {
         int                 nPts;   // number of pts;
 
 		vector <ofPoint>	hull;	// points of convex hull
+
+		vector <ofConvDefect> defects;
 
         //----------------------------------------
         ofxCvBlob() {
