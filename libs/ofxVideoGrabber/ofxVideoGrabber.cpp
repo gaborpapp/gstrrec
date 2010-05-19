@@ -71,7 +71,8 @@ bool ofxVideoGrabber::initGrabber( int _width, int _height, int _format, int _ta
         }
      }
 
-    settings->setupVideoSettings(videoGrabber);
+	if (settings != NULL)
+		settings->setupVideoSettings(videoGrabber);
 
     bGrabberInited = true;
     return initResult;
@@ -100,7 +101,8 @@ unsigned char* ofxVideoGrabber::getPixels()
 void ofxVideoGrabber::update()
 {
 	grabFrame();
-	settings->update();
+	if (settings != NULL)
+		settings->update();
 }
 
 //--------------------------------------------------------------------
@@ -130,7 +132,8 @@ void ofxVideoGrabber::draw(float _x, float _y, float _w, float _h)
 	if (bUseTexture){
 		tex.draw(_x, _y, _w, _h);
 	}
-	settings->draw();
+	if (settings != NULL)
+		settings->draw();
 }
 
 //--------------------------------------------------------------------

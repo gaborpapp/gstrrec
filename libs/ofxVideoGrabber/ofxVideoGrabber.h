@@ -29,21 +29,21 @@ class ofxVideoGrabber: public ofBaseVideo
 				  ofxVideoGrabberSDK* sdk = NULL,
 				  ofxVideoGrabberSettings* settings = NULL /*new ofxIIDCSettings */);
 
-		void 			listDevices();
+		void			listDevices();
 		bool            isFrameNew();
 		void            grabFrame();
         void            close();
-		void			videoSettings() {settings->toggleSettingsGUI();};
+		void			videoSettings() { if (settings != NULL) settings->toggleSettingsGUI(); };
 		unsigned char*  getPixels();
 		ofTexture &     getTextureReference();
-		void 			setVerbose(bool bTalkToMe);
+		void			setVerbose(bool bTalkToMe);
 		void			setDeviceID(int _deviceID);
 		void            setUseTexture(bool bUse);
 		void            draw(float x, float y);
 		void            draw(float x, float y, float w, float h);
         void            update();
-		float 		    getHeight();
-		float 		    getWidth();
+		float		    getHeight();
+		float		    getWidth();
 
 
 

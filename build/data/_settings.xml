@@ -11,10 +11,10 @@
         <name>Next camera</name>
         <value>0</value>
     </Button_Next_camera>
-    <Button_Camera_settings>
-        <name>Camera settings</name>
-        <value>0</value>
-    </Button_Camera_settings>
+    <Toggle_IEEE_1394>
+        <name>IEEE 1394</name>
+        <value>1</value>
+    </Toggle_IEEE_1394>
     <SliderFloat_Min_area>
         <name>Min area</name>
         <value>0.043750</value>

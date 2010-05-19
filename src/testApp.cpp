@@ -5,7 +5,8 @@ testApp::testApp() :
 	source_video_last(false),
 	camera_prev(false),
 	camera_next(false),
-	camera_settings(false),
+	//camera_settings(false),
+	camera_dc1394(true),
 	camera_id(0)
 {
 }
@@ -14,6 +15,7 @@ testApp::~testApp()
 {
 	video_player.close();
 	video_grabber.close();
+	video_grabber_dc1394.close();
 	video_texture.clear();
 
 	img_color.clear();
@@ -37,6 +39,13 @@ void testApp::setup()
 	video_grabber.listDevices();
 	video_grabber.setDeviceID(camera_id);
 
+	dc1394_sdk = new Libdc1394Grabber;
+	dc1394_sdk->listDevices();
+	dc1394_sdk->setDiscardFrames(true);
+	dc1394_sdk->set1394bMode(false);
+	video_grabber_dc1394.setVerbose(true);
+	video_grabber_dc1394.setDeviceID(camera_id);
+
 	video_width = max(video_player.getWidth(), video_grabber.getWidth());
 	video_height = max(video_player.getHeight(), video_grabber.getHeight());
 
@@ -54,7 +63,8 @@ void testApp::setup()
 	gui.addToggle("Use video", source_video).setSize(128, 20);
 	gui.addButton("Prev camera", camera_prev).setSize(128, 20);
 	gui.addButton("Next camera", camera_next).setDeltaPos(128 + c->padding.x,-(c->buttonHeight + c->padding.y)).setSize(128, 20);
-	gui.addButton("Camera settings", camera_settings).setSize(128, 20);
+	gui.addToggle("IEEE 1394", camera_dc1394).setSize(128, 20);
+	//gui.addButton("Camera settings", camera_settings).setSize(128, 20);
 
 	gui.addContent("Tracker", img_gray, 320).setNewColumn(true);
 	gui.addSlider("Min area", contour_min_area, 0, 1);
@@ -161,6 +171,14 @@ void testApp::update()
 {
 	static int values_inited = 0; // if gui values are loaded
 
+	if (source_video)
+		source = SOURCE_VIDEO;
+	else
+	if (camera_dc1394)
+		source = SOURCE_CAMERA_DC1394;
+	else
+		source = SOURCE_CAMERA;
+
 	// before the first update the gui is updated
 	if (!values_inited)
 	{
@@ -170,12 +188,19 @@ void testApp::update()
 
 	update_source();
 
-	img_color.setFromPixels(source_video ? video_player.getPixels() :
-										   video_grabber.getPixels(),
-							video_width, video_height);
+	if (!source_video && camera_dc1394)
+	{
+		img_gray.setFromPixels(video_grabber_dc1394.getPixels(), video_width, video_height);
+	}
+	else
+	{
+		img_color.setFromPixels(source_video ? video_player.getPixels() :
+											   video_grabber.getPixels(),
+								video_width, video_height);
 
-	// convert to grayscale with operator overloading
-	img_gray = img_color;
+		// convert to grayscale with operator overloading
+		img_gray = img_color;
+	}
 
 	// enhance image quality
 	apply_filters();
@@ -202,19 +227,38 @@ void testApp::update_source()
 		if (!source_video)
 		{
 			video_grabber.close();
-			video_grabber.setDeviceID(camera_id);
-			video_grabber.initGrabber(CAMERA_WIDTH, CAMERA_HEIGHT);
+			video_grabber_dc1394.close();
+			if (camera_dc1394)
+			{
+				cout << "init dc" << endl;
+				video_grabber_dc1394.setDeviceID(camera_id);
+				bool result = video_grabber_dc1394.initGrabber(CAMERA_WIDTH, CAMERA_HEIGHT,
+						VID_FORMAT_GREYSCALE, VID_FORMAT_GREYSCALE, 30, true, dc1394_sdk);
+
+				if (result)
+					ofLog(OF_LOG_VERBOSE,"Camera successfully initialized.");
+				else
+					ofLog(OF_LOG_FATAL_ERROR,"Camera failed to initialize.");
+			}
+			else
+			{
+				cout << "init quicktime" << endl;
+				video_grabber.setDeviceID(camera_id);
+				video_grabber.initGrabber(CAMERA_WIDTH, CAMERA_HEIGHT);
+			}
 		}
 
 		camera_next = camera_prev = false;
 	}
 
 	// show camera settings window
+	/*
 	if (camera_settings)
 	{
 		video_grabber.videoSettings();
 		camera_settings = false;
 	}
+	*/
 
 	// check source change
 	if (source_video != source_video_last)
@@ -224,12 +268,24 @@ void testApp::update_source()
 			video_player.play();
 			gui_video->setName("Video Feed");
 			video_grabber.close();
+			video_grabber_dc1394.close();
 		}
 		else
 		{
 			video_player.stop();
 			gui_video->setName("Camera Feed");
-			video_grabber.initGrabber(CAMERA_WIDTH, CAMERA_HEIGHT);
+			if (camera_dc1394)
+			{
+				bool result = video_grabber_dc1394.initGrabber(CAMERA_WIDTH, CAMERA_HEIGHT,
+						VID_FORMAT_GREYSCALE, VID_FORMAT_GREYSCALE, 30, true, dc1394_sdk);
+
+				if (result)
+					ofLog(OF_LOG_VERBOSE,"Camera successfully initialized.");
+				else
+					ofLog(OF_LOG_FATAL_ERROR,"Camera failed to initialize.");
+			}
+			else
+				video_grabber.initGrabber(CAMERA_WIDTH, CAMERA_HEIGHT);
 		}
 	}
 
@@ -247,12 +303,25 @@ void testApp::update_source()
 	}
 	else
 	{
-		video_grabber.update();
-		new_frame_available = video_grabber.isFrameNew();
-		if (new_frame_available)
+		if (camera_dc1394)
 		{
-			video_texture.loadData(video_grabber.getPixels(),
-					video_grabber.getWidth(), video_grabber.getHeight(), GL_RGB);
+			video_grabber_dc1394.update();
+			new_frame_available = video_grabber_dc1394.isFrameNew();
+			if (new_frame_available)
+			{
+				video_texture.loadData(video_grabber_dc1394.getPixels(),
+						video_grabber_dc1394.getWidth(), video_grabber_dc1394.getHeight(), GL_LUMINANCE);
+			}
+		}
+		else
+		{
+			video_grabber.update();
+			new_frame_available = video_grabber.isFrameNew();
+			if (new_frame_available)
+			{
+				video_texture.loadData(video_grabber.getPixels(),
+						video_grabber.getWidth(), video_grabber.getHeight(), GL_RGB);
+			}
 		}
 	}
 
