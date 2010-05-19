@@ -5,6 +5,7 @@ testApp::testApp() :
 	source_video_last(false),
 	camera_prev(false),
 	camera_next(false),
+	camera_settings(false),
 	camera_id(0)
 {
 }
@@ -53,6 +54,7 @@ void testApp::setup()
 	gui.addToggle("Use video", source_video).setSize(128, 20);
 	gui.addButton("Prev camera", camera_prev).setSize(128, 20);
 	gui.addButton("Next camera", camera_next).setDeltaPos(128 + c->padding.x,-(c->buttonHeight + c->padding.y)).setSize(128, 20);
+	gui.addButton("Camera settings", camera_settings).setSize(128, 20);
 
 	gui.addContent("Tracker", img_gray, 320).setNewColumn(true);
 	gui.addSlider("Min area", contour_min_area, 0, 1);
@@ -205,6 +207,13 @@ void testApp::update_source()
 		}
 
 		camera_next = camera_prev = false;
+	}
+
+	// show camera settings window
+	if (camera_settings)
+	{
+		video_grabber.videoSettings();
+		camera_settings = false;
 	}
 
 	// check source change

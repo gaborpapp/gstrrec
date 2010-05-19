@@ -1,7 +1,7 @@
 <controls>
     <Toggle_Use_video>
         <name>Use video</name>
-        <value>1</value>
+        <value>0</value>
     </Toggle_Use_video>
     <Button_Prev_camera>
         <name>Prev camera</name>
@@ -11,6 +11,10 @@
         <name>Next camera</name>
         <value>0</value>
     </Button_Next_camera>
+    <Button_Camera_settings>
+        <name>Camera settings</name>
+        <value>0</value>
+    </Button_Camera_settings>
     <SliderFloat_Min_area>
         <name>Min area</name>
         <value>0.043750</value>
@@ -21,11 +25,11 @@
     </SliderFloat_Max_area>
     <Toggle_Draw_bbox>
         <name>Draw bbox</name>
-        <value>0</value>
+        <value>1</value>
     </Toggle_Draw_bbox>
     <Toggle_Draw_blob>
         <name>Draw blob</name>
-        <value>1</value>
+        <value>0</value>
     </Toggle_Draw_blob>
     <Toggle_Draw_hull>
         <name>Draw hull</name>

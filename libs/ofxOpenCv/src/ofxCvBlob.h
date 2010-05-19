@@ -21,11 +21,18 @@ class ofConvDefect {
 		ofConvDefect(CvConvexityDefect *def)
 		{
 			depth_point = ofPoint(def->depth_point->x, def->depth_point->y);
+			start_point = ofPoint(def->start->x, def->start->y);
+			end_point = ofPoint(def->end->x, def->end->y);
 			depth = def->depth;
+			ofPoint t = ((start_point + end_point) / 2) - depth_point;
+			angle = atan2(t.y, t.x);
 		}
 
 		ofPoint depth_point;
+		ofPoint start_point;
+		ofPoint end_point;
 		float depth;
+		float angle;
 };
 
 class ofxCvBlob {

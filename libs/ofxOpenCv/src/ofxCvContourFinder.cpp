@@ -221,15 +221,26 @@ void ofxCvContourFinder::draw( float x, float y, float w, float h, unsigned flag
 		}
 
 	// ---------------------------- draw convexity defects
-	ofSetColor(0xFF7711);
 
+	ofSetColor(0xFF1111);
 	if (flags & DRAW_CONVDEFECT)
 		for (unsigned i = 0; i < blobs.size(); i++)
 		{
-			ofNoFill();
+			ofFill();
+			//cerr << blobs[i].defects.size() << endl;
 			for (unsigned j = 0; j < blobs[i].defects.size(); j++)
 			{
 				ofCircle(blobs[i].defects[j].depth_point.x, blobs[i].defects[j].depth_point.y, 6);
+				/*
+				ofLine(blobs[i].defects[j].depth_point.x, blobs[i].defects[j].depth_point.y,
+						blobs[i].defects[j].start_point.x, blobs[i].defects[j].start_point.y);
+				ofLine(blobs[i].defects[j].depth_point.x, blobs[i].defects[j].depth_point.y,
+						blobs[i].defects[j].end_point.x, blobs[i].defects[j].end_point.y);
+						*/
+
+				ofPoint d(blobs[i].defects[j].depth_point.x, blobs[i].defects[j].depth_point.y);
+				ofLine(d.x , d.y, d.x + blobs[i].defects[j].depth * cos(blobs[i].defects[j].angle),
+					d.y + blobs[i].defects[j].depth * sin(blobs[i].defects[j].angle));
 			}
 		}
 

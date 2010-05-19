@@ -38,6 +38,7 @@ class testApp : public ofSimpleApp
 
 		bool camera_prev;
 		bool camera_next;
+		bool camera_settings;
 
 		bool draw_bbox;
 		bool draw_blob;
